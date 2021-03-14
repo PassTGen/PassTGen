@@ -1,6 +1,6 @@
 ### Metals ###
-.metals/
-.bloop/
+.metals/*
+.bloop/*
 project/**/metals.sbt
 
 ### SBT ###
