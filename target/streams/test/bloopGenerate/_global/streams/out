@@ -1,4 +1,4 @@
-[debug] [passtgen-test] Classpath dependencies List()
-[debug] [passtgen-test] Dependencies from configurations List(passtgen)
-[debug] Bloop wrote the configuration of project 'passtgen-test' to 'F:\TheProject\PassTGen\.bloop\passtgen-test.json'
-[success] Generated .bloop\passtgen-test.json
+[debug] [root-test] Classpath dependencies List()
+[debug] [root-test] Dependencies from configurations List(root)
+[debug] Bloop wrote the configuration of project 'root-test' to 'F:\TheProject\PassTGen\.bloop\root-test.json'
+[success] Generated .bloop\root-test.json
