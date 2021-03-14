@@ -1,0 +1,149 @@
+{
+    "version": "1.4.0",
+    "project": {
+        "name": "passtgen",
+        "directory": "F:\\TheProject\\PassTGen",
+        "workspaceDir": "F:\\TheProject\\PassTGen",
+        "sources": [
+            "F:\\TheProject\\PassTGen\\src\\main\\scala",
+            "F:\\TheProject\\PassTGen\\src\\main\\scala-2.12",
+            "F:\\TheProject\\PassTGen\\src\\main\\scala-2",
+            "F:\\TheProject\\PassTGen\\src\\main\\java",
+            "F:\\TheProject\\PassTGen\\target\\scala-2.12\\src_managed\\main"
+        ],
+        "dependencies": [
+            
+        ],
+        "classpath": [
+            "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-library.jar"
+        ],
+        "out": "F:\\TheProject\\PassTGen\\.bloop\\passtgen",
+        "classesDir": "F:\\TheProject\\PassTGen\\.bloop\\passtgen\\scala-2.12\\classes",
+        "resources": [
+            "F:\\TheProject\\PassTGen\\src\\main\\resources",
+            "F:\\TheProject\\PassTGen\\target\\scala-2.12\\resource_managed\\main"
+        ],
+        "scala": {
+            "organization": "org.scala-lang",
+            "name": "scala-compiler",
+            "version": "2.12.12",
+            "options": [
+                
+            ],
+            "jars": [
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\jansi.jar",
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\jline.jar",
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-compiler.jar",
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-library.jar",
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-reflect.jar",
+                "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-xml_2.12.jar"
+            ],
+            "analysis": "F:\\TheProject\\PassTGen\\target\\streams\\compile\\bloopAnalysisOut\\_global\\streams\\inc_compile_2.12.zip",
+            "setup": {
+                "order": "mixed",
+                "addLibraryToBootClasspath": true,
+                "addCompilerToClasspath": false,
+                "addExtraJarsToClasspath": false,
+                "manageBootClasspath": true,
+                "filterLibraryFromClasspath": true
+            }
+        },
+        "java": {
+            "options": [
+                
+            ]
+        },
+        "test": {
+            "frameworks": [
+                {
+                    "names": [
+                        "org.scalacheck.ScalaCheckFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs2.runner.Specs2Framework",
+                        "org.specs2.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.specs.runner.SpecsFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "org.scalatest.tools.Framework",
+                        "org.scalatest.tools.ScalaTestFramework"
+                    ]
+                },
+                {
+                    "names": [
+                        "com.novocode.junit.JUnitFramework"
+                    ]
+                }
+            ],
+            "options": {
+                "excludes": [
+                    
+                ],
+                "arguments": [
+                    
+                ]
+            }
+        },
+        "platform": {
+            "name": "jvm",
+            "config": {
+                "home": "C:\\PROGRA~1\\Java\\JDK18~1.0_1\\jre",
+                "options": [
+                    "-Duser.dir=F:\\TheProject\\PassTGen"
+                ]
+            },
+            "mainClass": [
+                
+            ]
+        },
+        "resolution": {
+            "modules": [
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.12.12",
+                    "configurations": "default",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-library.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "C:\\Users\\USER\\AppData\\Local\\Coursier\\cache\\v1\\https\\repo1.maven.org\\maven2\\org\\scala-lang\\scala-library\\2.12.12\\scala-library-2.12.12-sources.jar"
+                        }
+                    ]
+                },
+                {
+                    "organization": "org.scala-lang",
+                    "name": "scala-library",
+                    "version": "2.12.12",
+                    "configurations": "optional",
+                    "artifacts": [
+                        {
+                            "name": "scala-library",
+                            "path": "C:\\Users\\USER\\.sbt\\boot\\scala-2.12.12\\lib\\scala-library.jar"
+                        },
+                        {
+                            "name": "scala-library",
+                            "classifier": "sources",
+                            "path": "C:\\Users\\USER\\AppData\\Local\\Coursier\\cache\\v1\\https\\repo1.maven.org\\maven2\\org\\scala-lang\\scala-library\\2.12.12\\scala-library-2.12.12-sources.jar"
+                        }
+                    ]
+                }
+            ]
+        },
+        "tags": [
+            "library"
+        ]
+    }
+}
