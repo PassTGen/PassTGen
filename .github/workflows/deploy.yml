@@ -30,6 +30,6 @@ jobs:
     # SSH user
         USER: ${{ secrets.SSH_USER }}
      - run: |
-        ssh root@DEV
+        ssh DEV
         cd /root/PassTGen
         git pull
