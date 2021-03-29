@@ -25,6 +25,11 @@ jobs:
     # SSH key
         SSHKEY: ${{ secrets.SSH_KEY }}
     # SSH host
-        NAME: ${{ secrets.SSH_HOST }}
+        ORIGIN: ${{ secrets.SSH_HOST }}
+        NAME: DEV
     # SSH user
         USER: ${{ secrets.SSH_USER }}
+     - run: |
+        ssh root@DEV
+        cd /root/PassTGen
+        git pull
