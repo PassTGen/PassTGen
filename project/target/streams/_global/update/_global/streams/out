@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 [0m[[0m[0mdebug[0m] [0m[0mnot up to date. inChanged = true, force = false[0m
 [0m[[0m[0mdebug[0m] [0m[0mUpdating ProjectRef(uri("file:/root/PassTGen/project/"), "passtgen-build")...[0m
 [0m[[0m[0mdebug[0m] [0m[0mDone updating ProjectRef(uri("file:/root/PassTGen/project/"), "passtgen-build")[0m
+=======
+[debug] not up to date. inChanged = true, force = false
+[debug] Updating ProjectRef(uri("file:/F:/TheProject/PassTGen/project/"), "passtgen-build")...
+[debug] Done updating ProjectRef(uri("file:/F:/TheProject/PassTGen/project/"), "passtgen-build")
+>>>>>>> dev
