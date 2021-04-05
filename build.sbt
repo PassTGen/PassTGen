@@ -17,3 +17,5 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-stream" % AkkaVersion,
   "com.typesafe.akka" %% "akka-http" % AkkaHttpVersion
 )
+
+libraryDependencies += "org.mongodb.scala" %% "mongo-scala-driver" % "4.2.2"
