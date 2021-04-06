@@ -6,47 +6,54 @@ import akka.actor.typed.scaladsl.Behaviors
 import user.User
 import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.scaladsl.AbstractBehavior
-import passtgen.db.DbManagerActor.CreateUser
-import passtgen.db.DbManagerActor.GetPassphrase
-import passtgen.db.DbManagerActor.GetPassphraseResponse
-import passtgen.db.DbManagerActor.GetUser
 import passtgen.auth.AuthActor
+import akka.actor.typed.Signal
+import akka.actor.TypedActor
+import akka.actor.typed.PostStop
 
 object DbManagerActor {
   def apply(): Behavior[Command] =
     Behaviors.setup(context => new DbManagerActor(context))
 
-  sealed trait Command
-  final case class CreateUser(user: User, replyTo: ActorRef[CreateUserResponse])
-      extends Command
-  final case class CreateUserResponse(replyTo: ActorRef[AuthActor.CreateUser])
-      extends Command
-  final case class GetUser(email: String, replyTo: ActorRef[GetUserResponse])
-      extends Command
-  final case class GetUserResponse(
-      maybeUser: Option[User],
-      replyTo: ActorRef[AuthActor.GetUserResponse]
+  trait Command
+  case class CreateUser(
+      email: String,
+      replyTo: ActorRef[AuthActor.Reply]
   ) extends Command
+  case class GetUser(email: String, replyTo: ActorRef[AuthActor.Reply])
+      extends Command
+  case class GetWords(replyTo: ActorRef[GetWordsResponse]) extends Command
 
-  final case class GetPassphrase(replyTo: ActorRef[GetUserResponse])
-      extends Command
-  final case class GetPassphraseResponse(
-      passphrase: String,
-      replyTo: ActorRef[GetUserResponse]
-  ) extends Command
+  case class CreateUserResponse(
+      user: Option[User]
+  )
+  case class GetUserResponse(
+      maybeUser: Option[User]
+  )
+  case class GetWordsResponse(
+      words: List[String]
+  )
 
 }
 class DbManagerActor(context: ActorContext[DbManagerActor.Command])
     extends AbstractBehavior[DbManagerActor.Command](context) {
   import DbManagerActor._
   override def onMessage(
-      msg: Command
-  ): Behavior[Command] =
+      msg: DbManagerActor.Command
+  ): Behavior[DbManagerActor.Command] =
     msg match {
-      case CreateUser(user, replyTo)                  => ???
-      case GetPassphrase(replyTo)                     => ???
-      case GetPassphraseResponse(passphrase, replyTo) => ???
-      case GetUser(email, replyTo)                    => ???
-      case GetUserResponse(email, replyTo)            => ???
+      case CreateUser(email, replyTo) =>
+        replyTo ! AuthActor.CreateUserResponse(User("3214123412", email))
+        Behaviors.stopped
+      case GetWords(replyTo) =>
+        val words = List("Patata", "zanahoria", "cebolla")
+        replyTo ! GetWordsResponse(words)
+        Behaviors.stopped
+      case GetUser(email, replyTo) =>
+        replyTo ! AuthActor.CreateUserResponse(User("3214123412", email))
+        Behaviors.stopped
     }
+  override def onSignal: PartialFunction[Signal, Behavior[Command]] = {
+    case PostStop => ???
+  }
 }

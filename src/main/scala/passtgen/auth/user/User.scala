@@ -1,9 +1,9 @@
 package user
 
-class User(val name: String, val email: String) {
+class User(val oid: String, val email: String) {
   override def toString(): String = {
     s"""|{
-        |   "name": "${name}",
+        |   "oid": "${oid}",
         |   "email": "${email}"
         |}""".stripMargin
   }
@@ -13,8 +13,8 @@ class User(val name: String, val email: String) {
 }
 
 object User {
-  def apply(name: String, email: String): Option[User] = {
-    if (checkEmail(email)) Some(new User(name, email))
+  def apply(oid: String, email: String): Option[User] = {
+    if (checkEmail(email)) Some(new User(oid, email))
     else None
   }
   def checkEmail(email: String): Boolean = {
