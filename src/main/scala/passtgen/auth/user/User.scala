@@ -1,14 +1,11 @@
 package user
 
-class User(val oid: String, val email: String) {
+case class User(val oid: String, val email: String) {
   override def toString(): String = {
     s"""|{
         |   "oid": "${oid}",
         |   "email": "${email}"
         |}""".stripMargin
-  }
-  def equals(x: User): Boolean = {
-    x.email == this.email
   }
 }
 
