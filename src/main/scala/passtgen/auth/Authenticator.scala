@@ -5,16 +5,16 @@ import user.User
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
-import passtgen.db.DbManagerActor
+import passtgen.db.DbManager
 import akka.actor.typed.scaladsl.AbstractBehavior
 import akka.actor.typed.scaladsl.ActorContext
 import akka.util.Timeout
 import scala.concurrent.duration._
 
-object AuthActor {
+object Authenticator {
 
   def apply(): Behavior[Command] =
-    Behaviors.setup(context => new AuthActor(context))
+    Behaviors.setup(context => new Authenticator(context))
 
   sealed trait Command
   final case class CreateUser(
@@ -31,18 +31,20 @@ object AuthActor {
   final case class CreateUserResponse(maybeUser: Option[User]) extends Reply
 
 }
-class AuthActor(context: ActorContext[AuthActor.Command])
-    extends AbstractBehavior[AuthActor.Command](context) {
-  import AuthActor._
-  override def onMessage(msg: AuthActor.Command): Behavior[AuthActor.Command] =
+class Authenticator(context: ActorContext[Authenticator.Command])
+    extends AbstractBehavior[Authenticator.Command](context) {
+  import Authenticator._
+  override def onMessage(
+      msg: Authenticator.Command
+  ): Behavior[Authenticator.Command] =
     msg match {
       case CreateUser(email, replyTo) =>
-        val dbActor = context.spawn(DbManagerActor(), "CreateUserActorDb")
-        dbActor ! DbManagerActor.CreateUser(email, context.self)
+        val dbActor = context.spawn(DbManager(), "CreateUserActorDb")
+        dbActor ! DbManager.CreateUser(email, context.self)
         Behaviors.same
       case GetUser(email, replyTo) =>
-        val dbActor = context.spawn(DbManagerActor(), "GetUserActorDb")
-        dbActor ! DbManagerActor.GetUser(email, context.self)
+        val dbActor = context.spawn(DbManager(), "GetUserActorDb")
+        dbActor ! DbManager.GetUser(email, context.self)
         Behaviors.same
 
       case GetUserResponse(maybeUser) =>
