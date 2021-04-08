@@ -1,17 +1,10 @@
-package user
-
-case class User(val oid: String, val email: String) {
-  override def toString(): String = {
-    s"""|{
-        |   "oid": "${oid}",
-        |   "email": "${email}"
-        |}""".stripMargin
-  }
-}
+package passtgen.auth.user
+import org.mongodb.scala.bson.ObjectId
+case class User(val _id: ObjectId, val email: String)
 
 object User {
-  def apply(oid: String, email: String): Option[User] = {
-    if (checkEmail(email)) Some(new User(oid, email))
+  def apply(_id: ObjectId, email: String): Option[User] = {
+    if (checkEmail(email)) Some(new User(_id, email))
     else None
   }
   def checkEmail(email: String): Boolean = {
