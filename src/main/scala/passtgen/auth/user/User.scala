@@ -1,11 +1,14 @@
 package passtgen.auth.user
-import org.mongodb.scala.bson.ObjectId
-case class User(val _id: ObjectId, val email: String)
+
+import reactivemongo.api.bson.BSONValue
+import com.typesafe.config.ConfigException
+case class User(val email: String)
 
 object User {
-  def apply(_id: ObjectId, email: String): Option[User] = {
-    if (checkEmail(email)) Some(new User(_id, email))
-    else None
+
+  def apply(email: String): User = {
+    if (checkEmail(email)) new User(email)
+    else null
   }
   def checkEmail(email: String): Boolean = {
     val emailRegex =

@@ -9,6 +9,10 @@ import akka.actor.typed.scaladsl.AbstractBehavior
 import akka.actor.typed.scaladsl.ActorContext
 import akka.util.Timeout
 import scala.concurrent.duration._
+import passtgen.auth.user.UserDB
+import scala.util.Failure
+import akka.actor.Status
+import scala.util.Success
 //TODO: REFACTOR THIS TO PIPE PATTERN
 object Authenticator {
 
@@ -18,7 +22,7 @@ object Authenticator {
   sealed trait Command
   case class CreateUser(
       email: String,
-      replyTo: ActorRef[CreateUser]
+      replyTo: ActorRef[CreateUserResponse]
   ) extends Command
   case class GetUser(
       email: String,
@@ -31,16 +35,22 @@ object Authenticator {
 
   def AuthenticationProcesses(user: User): Behavior[Command] =
     Behaviors.receive { (context, message) =>
+      implicit val exCtx = context.executionContext
       message match {
         case CreateUser(email, replyTo) =>
-          val dbActor = context.spawn(DbManager(), "CreateUserActorDb")
-          dbActor ! DbManager.CreateUser(email, context.self)
+          val dbUser = UserDB(exCtx)
+          dbUser.createUser(email).onComplete {
+            case Failure(_)    => replyTo ! CreateUserResponse(None)
+            case Success(user) => replyTo ! CreateUserResponse(Some(user))
+          }
           Behaviors.same
         case GetUser(email, replyTo) =>
-          val dbActor = context.spawn(DbManager(), "GetUserActorDb")
-          dbActor ! DbManager.GetUser(email, context.self)
+          val dbUser: UserDB = UserDB(exCtx)
+          dbUser.getUser(email).onComplete {
+            case Failure(_)    => replyTo ! GetUserResponse(None)
+            case Success(user) => replyTo ! GetUserResponse(user)
+          }
           Behaviors.same
-
         case GetUserResponse(maybeUser) =>
           Behaviors.ignore
         case CreateUserResponse(maybeUser) =>

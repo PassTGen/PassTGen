@@ -1,12 +1,9 @@
 package passtgen.auth.user
-import org.mongodb.scala.bson.codecs.Macros._
-import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
-import org.bson.codecs.configuration.CodecRegistries.{
-  fromRegistries,
-  fromProviders
-}
-import org.bson.codecs.configuration.CodecRegistry
+
+import reactivemongo.api.bson.BSONDocumentWriter
+import reactivemongo.api.bson.Macros
+import reactivemongo.api.bson.BSONDocumentReader
 object UserCodec {
-  def apply(): CodecRegistry =
-    fromRegistries(fromProviders(classOf[User]), DEFAULT_CODEC_REGISTRY)
+  implicit def userWriter: BSONDocumentWriter[User] = Macros.writer[User]
+  implicit def userReader: BSONDocumentReader[User] = Macros.reader[User]
 }
