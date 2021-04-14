@@ -17,7 +17,7 @@ import scala.util.Success
 object Authenticator {
 
   def apply(): Behavior[Command] =
-    Behaviors.setup(context => new Authenticator(context))
+    AuthenticationProcesses()
 
   sealed trait Command
   case class CreateUser(
@@ -33,7 +33,7 @@ object Authenticator {
   case class GetUserResponse(maybeUser: Option[User]) extends Reply
   case class CreateUserResponse(maybeUser: Option[User]) extends Reply
 
-  def AuthenticationProcesses(user: User): Behavior[Command] =
+  def AuthenticationProcesses(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       implicit val exCtx = context.executionContext
       message match {
@@ -57,27 +57,5 @@ object Authenticator {
           Behaviors.ignore
       }
 
-    }
-}
-class Authenticator(context: ActorContext[Authenticator.Command])
-    extends AbstractBehavior[Authenticator.Command](context) {
-  import Authenticator._
-  override def onMessage(
-      msg: Authenticator.Command
-  ): Behavior[Authenticator.Command] =
-    msg match {
-      case CreateUser(email, replyTo) =>
-        val dbActor = context.spawn(DbManager(), "CreateUserActorDb")
-        dbActor ! DbManager.CreateUser(email, context.self)
-        Behaviors.same
-      case GetUser(email, replyTo) =>
-        val dbActor = context.spawn(DbManager(), "GetUserActorDb")
-        dbActor ! DbManager.GetUser(email, context.self)
-        Behaviors.same
-
-      case GetUserResponse(maybeUser) =>
-        Behaviors.ignore
-      case CreateUserResponse(maybeUser) =>
-        Behaviors.ignore
     }
 }

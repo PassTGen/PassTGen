@@ -10,13 +10,13 @@ import reactivemongo.api.bson.collection.BSONCollection
 
 object UserDB {
   def apply(implicit ctx: ExecutionContext): UserDB =
-    new UserDB()
+    new UserDB(CommonDb(ctx), ctx)
 
 }
-class UserDB(implicit val ctx: ExecutionContext) {
+class UserDB(val commondb: CommonDb, implicit val ctx: ExecutionContext) {
   import UserCodec._
   val userCollection: Future[BSONCollection] =
-    CommonDb(ctx).passtgendb.map(_.collection("users"))
+    commondb.passtgendb.map(_.collection("users"))
 
   def createUser(email: String): Future[User] =
     User(email) match {
