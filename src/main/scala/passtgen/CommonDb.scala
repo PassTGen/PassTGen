@@ -11,7 +11,7 @@ import scala.concurrent.Future
 object CommonDb {
 
   implicit val driver = AsyncDriver()
-  def apply(implicit ctx: ExecutionContext) = new CommonDb()
+  def apply(implicit ctx: ExecutionContext) = new CommonDb
 }
 
 class CommonDb(

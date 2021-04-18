@@ -3,7 +3,8 @@ import scala.concurrent.Future
 import passtgen.passgen.Parameters
 import scala.util.Random
 import scala.concurrent.ExecutionContext
-
+// I took the base algortithm and modded it from here:
+// https://github.com/bitwarden/jslib/blob/master/src/services/passwordGeneration.service.ts
 object Password {
 
   val defaultParameters: Seq[Parameters] = Seq(

@@ -9,13 +9,13 @@ import reactivemongo.api.bson._
 import reactivemongo.api.bson.collection.BSONCollection
 object WordDB {
 
-  def apply(ctx: ExecutionContext): WordDB =
-    new WordDB(CommonDb(ctx), ctx)
+  def apply(implicit ctx: ExecutionContext): WordDB =
+    new WordDB()
 }
-class WordDB(val commondb: CommonDb, implicit val ctx: ExecutionContext) {
+class WordDB(implicit val ctx: ExecutionContext) {
   import WordCodec._
   val wordList: Future[BSONCollection] =
-    commondb.passtgendb.map(_.collection("wordlist"))
+    CommonDb(ctx).passtgendb.map(_.collection("wordlist"))
   def getWord(id: Int): Future[Option[Word]] = {
     wordList
       .flatMap(
