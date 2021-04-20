@@ -31,6 +31,5 @@ class UserDB(val commondb: CommonDb, implicit val ctx: ExecutionContext) {
         _.find(BSONDocument("email" -> BSONDocument("$eq" -> email)))
           .one[User]
       )
-
   }
 }

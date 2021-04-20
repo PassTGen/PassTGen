@@ -1,19 +1,18 @@
 package passtgen.auth
 
-import user.User
-
+import akka.actor.Status
 import akka.actor.typed.ActorRef
 import akka.actor.typed.Behavior
-import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.scaladsl.AbstractBehavior
 import akka.actor.typed.scaladsl.ActorContext
+import akka.actor.typed.scaladsl.Behaviors
 import akka.util.Timeout
-import scala.concurrent.duration._
 import passtgen.auth.user.UserDB
+import passtgen.auth.user.User
+import scala.concurrent.duration._
 import scala.util.Failure
-import akka.actor.Status
 import scala.util.Success
-//TODO: REFACTOR THIS TO PIPE PATTERN
+
 object Authenticator {
 
   def apply(): Behavior[Command] =
@@ -21,40 +20,41 @@ object Authenticator {
 
   sealed trait Command
   case class CreateUser(
-      email: String,
-      replyTo: ActorRef[CreateUserResponse]
+      email: String
   ) extends Command
   case class GetUser(
-      email: String,
-      replyTo: ActorRef[GetUserResponse]
+      email: String
   ) extends Command
 
-  sealed trait Reply extends Command
-  case class GetUserResponse(maybeUser: Option[User]) extends Reply
-  case class CreateUserResponse(maybeUser: Option[User]) extends Reply
+  case class GetUserResponse(maybeUser: Option[User]) extends Command
+  case class CreateUserResponse(maybeUser: User) extends Command
+  case class UserDatabaseFailure(exception: Throwable) extends Command
 
   def AuthenticationProcesses(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       implicit val exCtx = context.executionContext
       message match {
-        case CreateUser(email, replyTo) =>
+        case CreateUser(email) =>
           val dbUser = UserDB(exCtx)
-          dbUser.createUser(email).onComplete {
-            case Failure(_)    => replyTo ! CreateUserResponse(None)
-            case Success(user) => replyTo ! CreateUserResponse(Some(user))
+          context.pipeToSelf(dbUser.createUser(email)) {
+            case Failure(ex)   => UserDatabaseFailure(ex)
+            case Success(user) => CreateUserResponse(user)
           }
           Behaviors.same
-        case GetUser(email, replyTo) =>
+        case GetUser(email) =>
           val dbUser: UserDB = UserDB(exCtx)
-          dbUser.getUser(email).onComplete {
-            case Failure(_)    => replyTo ! GetUserResponse(None)
-            case Success(user) => replyTo ! GetUserResponse(user)
+          context.pipeToSelf(dbUser.getUser(email)) {
+            case Failure(ex)   => UserDatabaseFailure(ex)
+            case Success(user) => GetUserResponse(user)
           }
           Behaviors.same
         case GetUserResponse(maybeUser) =>
-          Behaviors.ignore
+          Behaviors.same
         case CreateUserResponse(maybeUser) =>
-          Behaviors.ignore
+          Behaviors.same
+        case UserDatabaseFailure(ex) =>
+          context.log.error(ex.getMessage())
+          Behaviors.same
       }
 
     }
