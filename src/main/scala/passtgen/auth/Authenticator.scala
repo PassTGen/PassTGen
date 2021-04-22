@@ -12,6 +12,7 @@ import passtgen.auth.user.User
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
+import passtgen.passgen.PasswordGen
 
 object Authenticator {
 
@@ -22,11 +23,17 @@ object Authenticator {
   case class CreateUser(
       email: String
   ) extends Command
-  case class GetUser(
-      email: String
+  case class AuthUser(
+      email: String,
+      genCommand: PasswordGen.Command,
+      replyTo: ActorRef[PasswordGen.Command]
   ) extends Command
 
-  case class GetUserResponse(maybeUser: Option[User]) extends Command
+  case class AuthUserResponse(
+      maybeUser: Option[User],
+      genCommand: PasswordGen.Command,
+      replyTo: ActorRef[PasswordGen.Command]
+  ) extends Command
   case class CreateUserResponse(maybeUser: User) extends Command
   case class UserDatabaseFailure(exception: Throwable) extends Command
 
@@ -41,15 +48,21 @@ object Authenticator {
             case Success(user) => CreateUserResponse(user)
           }
           Behaviors.same
-        case GetUser(email) =>
+        case AuthUser(email, genCommand, replyTo) =>
           val dbUser: UserDB = UserDB(exCtx)
           context.pipeToSelf(dbUser.getUser(email)) {
             case Failure(ex)   => UserDatabaseFailure(ex)
-            case Success(user) => GetUserResponse(user)
+            case Success(user) => AuthUserResponse(user, genCommand, replyTo)
           }
           Behaviors.same
-        case GetUserResponse(maybeUser) =>
-          Behaviors.same
+        case AuthUserResponse(maybeUser, genCommand, replyTo) =>
+          maybeUser match {
+            case None =>
+              replyTo ! PasswordGen.AuthFailure(new Exception("NotFound"))
+            case Some(value) =>
+              replyTo ! genCommand
+          }
+          Behaviors.stopped
         case CreateUserResponse(maybeUser) =>
           Behaviors.same
         case UserDatabaseFailure(ex) =>
