@@ -107,7 +107,7 @@ class Password(val parameters: Seq[Parameters])(implicit
     }
   }
 
-  def generatePassword(): Future[String] = Future {
+  def generatePassword(): Option[String] = Option {
     val filledPositions: List[Char] =
       positions ++ lowercasePositionChars(length - positions.length)
     Random
