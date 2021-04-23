@@ -59,8 +59,8 @@ object Authenticator {
           maybeUser match {
             case None =>
               replyTo ! PasswordGen.AuthFailure(new Exception("NotFound"))
-            case Some(value) =>
-              replyTo ! genCommand
+            case Some(user) =>
+              replyTo ! PasswordGen.AuthSuccess(user.email, genCommand)
           }
           Behaviors.stopped
         case CreateUserResponse(maybeUser) =>

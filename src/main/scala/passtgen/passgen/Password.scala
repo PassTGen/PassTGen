@@ -21,14 +21,11 @@ object Password {
   val numericCharset: String = "0123456789"
   val specialCharset: String = "!@#$%^&*()[]{}"
 
-  def apply()(implicit ctx: ExecutionContext): Password = new Password(
-    defaultParameters
-  )(ctx)
-
-  def apply(parameters: Parameters*)(implicit ctx: ExecutionContext): Password =
-    new Password(
-      sanitizeLength(parameters)
-    )(ctx)
+  def apply(parameters: Parameters*): Password =
+    if (parameters != Nil)
+      new Password(sanitizeLength(parameters))
+    else
+      new Password(defaultParameters)
 
   def sanitizeLength(parameters: Seq[Parameters]): Seq[Parameters] =
     parameters.map({
@@ -53,9 +50,7 @@ object Password {
     Range(0, n).map(_ => 's').toList
 }
 
-class Password(val parameters: Seq[Parameters])(implicit
-    val ctx: ExecutionContext
-) {
+class Password(val parameters: Seq[Parameters]) {
   import Password._
 
   private val Length(length) =
