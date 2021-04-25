@@ -17,30 +17,54 @@ import passtgen.passgen.passphrase.word.WordDB
 import passtgen.passgen.passphrase.Passphrase
 
 object PasswordGen {
-  def apply(replyTo: ActorRef[Command]): Behavior[Command] =
-    authenticator(
-      replyTo
-    )
+  def apply(): Behavior[Command] =
+    authenticator()
 
   sealed trait Command
   case class GetPassword(
-      parameters: Parameters*
+      replyTo: ActorRef[Command],
+      parameters: Seq[GeneratorParameters]
   ) extends Command
   case class GetPassphrase(
-      length: Length
+      length: Length,
+      replyTo: ActorRef[Command]
   ) extends Command
-  case class GetPasswordResponse(maybePassword: Option[String]) extends Command
-  case class GetPassphraseResponse(maybePassphrase: String) extends Command
-  case class PassphraseDatabaseFailure(exception: Throwable) extends Command
+  case class GetPasswordResponse(
+      maybePassword: String,
+      replyTo: ActorRef[Command]
+  ) extends Command
+  case class GetPassphraseResponse(
+      maybePassphrase: String,
+      replyTo: ActorRef[Command]
+  ) extends Command
+  case class PassphraseDatabaseFailure(
+      exception: String,
+      replyTo: ActorRef[Command]
+  ) extends Command
 
-  case class Authentication(email: String, genCommand: Command) extends Command
-  case class AuthSuccess(email: String, genCommand: Command) extends Command
-  case class AuthFailure(exception: Throwable) extends Command
+  case class Generate(
+      email: String,
+      genCommand: String,
+      genParameters: Seq[GeneratorParameters],
+      replyTo: ActorRef[Command]
+  ) extends Command
+  case class AuthSuccess(
+      email: String,
+      genCommand: String,
+      genParameters: Seq[GeneratorParameters],
+      replyTo: ActorRef[Command]
+  ) extends Command
+  case class AuthFailure(exception: String, replyTo: ActorRef[Command])
+      extends Command
 
-  def authenticator(replyTo: ActorRef[Command]): Behavior[Command] =
+  final case class PasswordGeneratedOK(password: String) extends Command
+  final case class DatabaseFailure(reason: String) extends Command
+  final case class AuthUserFailure(reason: String) extends Command
+
+  def authenticator(): Behavior[Command] =
     Behaviors.receive[Command] { (context, message) =>
       message match {
-        case Authentication(email, genCommand) =>
+        case Generate(email, genCommand, genParameters, replyTo) =>
           val authenticator = context.spawn(Authenticator(), s"auth-$email")
           authenticator ! Authenticator.AuthUser(
             email,
@@ -48,40 +72,47 @@ object PasswordGen {
             context.self
           )
           Behaviors.same
-        case AuthSuccess(email, genCommand) =>
+        case AuthSuccess(email, genCommand, genParameters, replyTo) =>
           val generator =
-            context.spawn(generatorBeheavior(replyTo), s"gen-$email")
-          generator ! genCommand
+            context.spawn(generatorBeheavior(), s"gen-$email")
+          generator ! (genCommand match {
+            case "password" => GetPassword(replyTo, genParameters)
+            case "passphrase" =>
+              GetPassphrase(genParameters.head.asInstanceOf[Length], replyTo)
+          })
           Behaviors.same
-        case AuthFailure(ex) =>
-          context.log.error(ex.getMessage())
+        case AuthFailure(ex, replyTo) =>
+          replyTo ! AuthUserFailure(ex)
           Behaviors.same
       }
     }
 
-  def generatorBeheavior(replyTo: ActorRef[Command]): Behavior[Command] =
+  def generatorBeheavior(): Behavior[Command] =
     Behaviors.receive[Command] { (context, message) =>
       message match {
-        case GetPassword(parameters) =>
+        case GetPassword(replyTo, parameters) =>
           val pass = Password(parameters)
-          context.self ! GetPasswordResponse(pass.generatePassword())
+          context.self ! GetPasswordResponse(pass.generatePassword(), replyTo)
           Behaviors.same
-        case GetPasswordResponse(maybePassword) =>
+        case GetPasswordResponse(maybePassword, replyTo) =>
+          replyTo ! PasswordGeneratedOK(maybePassword)
           Behaviors.same
-        case GetPassphrase(length) =>
+        case GetPassphrase(length, replyTo) =>
           implicit val exCtx = context.executionContext
           val passphrase = Passphrase(length)
           context.pipeToSelf(passphrase.generatePassphrase) {
-            case Failure(ex)         => PassphraseDatabaseFailure(ex)
-            case Success(passphrase) => GetPassphraseResponse(passphrase)
+            case Failure(ex) =>
+              PassphraseDatabaseFailure(ex.getMessage(), replyTo)
+            case Success(passphrase) =>
+              GetPassphraseResponse(passphrase, replyTo)
           }
           Behaviors.same
-        case GetPassphraseResponse(maybePassphrase) =>
+        case GetPassphraseResponse(maybePassphrase, replyTo) =>
+          replyTo ! PasswordGeneratedOK(maybePassphrase)
           Behaviors.same
-        case PassphraseDatabaseFailure(ex) =>
-          context.log.error(ex.getMessage())
+        case PassphraseDatabaseFailure(ex, replyTo) =>
+          replyTo ! DatabaseFailure(ex)
           Behaviors.same
-
       }
     }
 }

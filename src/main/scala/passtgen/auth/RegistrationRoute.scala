@@ -31,7 +31,7 @@ class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
         pathEnd {
           concat(
             post {
-              entity(as[String]) { email =>
+              parameter("email") { email =>
                 val operationPerformed: Future[Command] =
                   authenticator.ask(CreateUser(email, _))
                 onSuccess(operationPerformed) {

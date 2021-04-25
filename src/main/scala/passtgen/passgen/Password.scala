@@ -1,13 +1,13 @@
 package passtgen.passgen
 import scala.concurrent.Future
-import passtgen.passgen.Parameters
+import passtgen.passgen.GeneratorParameters
 import scala.util.Random
 import scala.concurrent.ExecutionContext
 // I took the base algortithm and modded it from here:
 // https://github.com/bitwarden/jslib/blob/master/src/services/passwordGeneration.service.ts
 object Password {
 
-  val defaultParameters: Seq[Parameters] = Seq(
+  val defaultParameters: Seq[GeneratorParameters] = Seq(
     Length(10),
     Capitalize(true),
     AlphaNumeric
@@ -21,20 +21,22 @@ object Password {
   val numericCharset: String = "0123456789"
   val specialCharset: String = "!@#$%^&*()[]{}"
 
-  def apply(parameters: Parameters*): Password =
+  def apply(parameters: GeneratorParameters*): Password =
     if (parameters != Nil)
       new Password(sanitizeLength(parameters))
     else
       new Password(defaultParameters)
 
-  def sanitizeLength(parameters: Seq[Parameters]): Seq[Parameters] =
+  def sanitizeLength(
+      parameters: Seq[GeneratorParameters]
+  ): Seq[GeneratorParameters] =
     parameters.map({
       case Length(n) => {
         if (n > maxLength.n) maxLength
         else if (n < minLength.n) minLength
         else Length(n)
       }
-      case a: Parameters => a
+      case a: GeneratorParameters => a
     })
 
   def lowercasePositionChars(n: Int): List[Char] =
@@ -50,7 +52,7 @@ object Password {
     Range(0, n).map(_ => 's').toList
 }
 
-class Password(val parameters: Seq[Parameters]) {
+class Password(val parameters: Seq[GeneratorParameters]) {
   import Password._
 
   private val Length(length) =
@@ -102,7 +104,7 @@ class Password(val parameters: Seq[Parameters]) {
     }
   }
 
-  def generatePassword(): Option[String] = Option {
+  def generatePassword(): String = {
     val filledPositions: List[Char] =
       positions ++ lowercasePositionChars(length - positions.length)
     Random
@@ -115,5 +117,4 @@ class Password(val parameters: Seq[Parameters]) {
       })
       .mkString
   }
-
 }
