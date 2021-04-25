@@ -69,6 +69,7 @@ object PasswordGen {
           authenticator ! Authenticator.AuthUser(
             email,
             genCommand,
+            genParameters,
             context.self
           )
           Behaviors.same

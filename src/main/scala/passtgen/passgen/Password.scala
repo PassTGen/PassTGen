@@ -21,7 +21,7 @@ object Password {
   val numericCharset: String = "0123456789"
   val specialCharset: String = "!@#$%^&*()[]{}"
 
-  def apply(parameters: GeneratorParameters*): Password =
+  def apply(parameters: Seq[GeneratorParameters]): Password =
     if (parameters != Nil)
       new Password(sanitizeLength(parameters))
     else

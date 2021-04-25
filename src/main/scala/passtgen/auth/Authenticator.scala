@@ -12,6 +12,7 @@ import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 import passtgen.passgen.PasswordGen
+import passtgen.passgen.GeneratorParameters
 import org.xbill.DNS.utils.base64
 
 object Authenticator {
@@ -23,6 +24,7 @@ object Authenticator {
   case class AuthUser(
       email: String,
       genCommand: String,
+      genParameters: Seq[GeneratorParameters],
       replyTo: ActorRef[PasswordGen.Command]
   ) extends Command
 
@@ -30,6 +32,7 @@ object Authenticator {
   case class AuthUserResponse(
       maybeUser: Option[User],
       genCommand: String,
+      genParameters: Seq[GeneratorParameters],
       replyTo: ActorRef[PasswordGen.Command]
   ) extends Response
   case class UserDatabaseFailure(
@@ -41,16 +44,17 @@ object Authenticator {
     Behaviors.receive { (context, message) =>
       implicit val exCtx = context.executionContext
       message match {
-        case AuthUser(email, genCommand, replyTo) =>
+        case AuthUser(email, genCommand, genParameters, replyTo) =>
           val dbUser: UserDB = UserDB(exCtx)
           val decryptEmail =
             new String(java.util.Base64.getDecoder.decode(email))
           context.pipeToSelf(dbUser.getUser(decryptEmail)) {
-            case Failure(ex)   => UserDatabaseFailure(ex.getMessage(), replyTo)
-            case Success(user) => AuthUserResponse(user, genCommand, replyTo)
+            case Failure(ex) => UserDatabaseFailure(ex.getMessage(), replyTo)
+            case Success(user) =>
+              AuthUserResponse(user, genCommand, genParameters, replyTo)
           }
           Behaviors.same
-        case AuthUserResponse(maybeUser, genCommand, replyTo) =>
+        case AuthUserResponse(maybeUser, genCommand, genParameters, replyTo) =>
           maybeUser match {
             case None =>
               replyTo ! PasswordGen.AuthFailure(
@@ -58,7 +62,12 @@ object Authenticator {
                 replyTo
               )
             case Some(user) =>
-              replyTo ! PasswordGen.AuthSuccess(user.email, genCommand, replyTo)
+              replyTo ! PasswordGen.AuthSuccess(
+                user.email,
+                genCommand,
+                genParameters,
+                replyTo
+              )
           }
           Behaviors.stopped
         case UserDatabaseFailure(ex, replyTo) =>

@@ -65,11 +65,11 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
               val genParameters: Seq[GeneratorParameters] = Seq(
                 Length(length)
               )
-              val generatePassword: Future[Command] =
+              val generatePassphrase: Future[Command] =
                 passgen.ask(
-                  Generate(email, "password", genParameters, _)
+                  Generate(email, "passphrase", genParameters, _)
                 )
-              onSuccess(generatePassword) {
+              onSuccess(generatePassphrase) {
                 case PasswordGeneratedOK(password) => complete(password)
                 case AuthUserFailure(ex) =>
                   complete(StatusCodes.Unauthorized -> ex)
