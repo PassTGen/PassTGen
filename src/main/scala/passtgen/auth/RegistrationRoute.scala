@@ -3,6 +3,7 @@ package passtgen.auth
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json._
 import passtgen.auth.user.User._
+import passtgen.JsonSupport
 import akka.actor.typed.ActorSystem
 import akka.util.Timeout
 
@@ -13,11 +14,6 @@ import akka.http.scaladsl.server.Route
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import akka.actor.typed.ActorRef
-
-trait JsonSupport extends SprayJsonSupport {
-  import DefaultJsonProtocol._
-  implicit val userFormat = jsonFormat1(User)
-}
 
 class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
     system: ActorSystem[_]
@@ -37,7 +33,7 @@ class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
             post {
               entity(as[String]) { email =>
                 val operationPerformed: Future[Command] =
-                  authenticator.ask(Registration.CreateUser(email, _))
+                  authenticator.ask(CreateUser(email, _))
                 onSuccess(operationPerformed) {
                   case OK(user) => complete(user)
                   case DatabaseFailure(reason) =>
