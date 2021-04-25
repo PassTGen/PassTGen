@@ -2,10 +2,9 @@ package passtgen.auth.user
 
 import reactivemongo.api.bson.BSONValue
 import com.typesafe.config.ConfigException
-case class User(val email: String)
 
 object User {
-
+  final case class User(val email: String)
   def apply(email: String): User = {
     if (checkEmail(email)) new User(email)
     else null

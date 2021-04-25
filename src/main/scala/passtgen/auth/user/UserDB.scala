@@ -7,6 +7,7 @@ import scala.util.Success
 import passtgen.CommonDb
 import reactivemongo.api.bson._
 import reactivemongo.api.bson.collection.BSONCollection
+import User._
 
 object UserDB {
   def apply(implicit ctx: ExecutionContext): UserDB =
