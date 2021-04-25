@@ -49,7 +49,8 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
                   Generate(email, "password", genParameters, _)
                 )
               onSuccess(generatePassword) {
-                case PasswordGeneratedOK(password) => complete(password)
+                case PasswordGeneratedOK(password) =>
+                  complete(StatusCodes.OK -> password)
                 case AuthUserFailure(ex) =>
                   complete(StatusCodes.Unauthorized -> ex)
               }
@@ -70,9 +71,12 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
                   Generate(email, "passphrase", genParameters, _)
                 )
               onSuccess(generatePassphrase) {
-                case PasswordGeneratedOK(password) => complete(password)
+                case PasswordGeneratedOK(password) =>
+                  complete(StatusCodes.OK -> password)
                 case AuthUserFailure(ex) =>
                   complete(StatusCodes.Unauthorized -> ex)
+                case DatabaseFailure(ex) =>
+                  complete(StatusCodes.InternalServerError -> ex)
               }
             }
           }

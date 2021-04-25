@@ -35,7 +35,7 @@ class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
                 val operationPerformed: Future[Command] =
                   authenticator.ask(CreateUser(email, _))
                 onSuccess(operationPerformed) {
-                  case OK(user) => complete(user)
+                  case OK(user) => complete(StatusCodes.OK -> user)
                   case DatabaseFailure(reason) =>
                     complete(StatusCodes.InternalServerError -> reason)
                 }
