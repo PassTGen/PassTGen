@@ -22,65 +22,64 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
   import akka.actor.typed.scaladsl.AskPattern.Askable
   import PasswordGen._
 
-  implicit val timeout: Timeout = 3.seconds
+  implicit val timeout: Timeout = 5.seconds
 
   lazy val passgenRoutes: Route =
-    pathPrefix("passgen") {
-      concat(
-        path("password") {
-          parameters(
-            "email",
-            "length".as[Int] ? 10,
-            "symbols" ? "alphanumeric",
-            "capitalize".as[Boolean] ? true
-          ) { (email, length, symbols, capitalize) =>
-            {
-              val genParameters: Seq[GeneratorParameters] = Seq(
-                Length(length),
-                symbols.toLowerCase match {
-                  case "alphanumericspecial" => AlphaNumericSpecial
-                  case "alpha"               => Alpha
-                  case _                     => AlphaNumeric
-                },
-                Capitalize(capitalize)
+    concat(
+      path("password") {
+        parameters(
+          "auth",
+          "length".as[Int] ? 10,
+          "symbols" ? "alphanumeric",
+          "capitalize".as[Boolean] ? true
+        ) { (auth, length, symbols, capitalize) =>
+          {
+            val genParameters: Seq[GeneratorParameters] = Seq(
+              Length(length),
+              symbols.toLowerCase match {
+                case "alphanumericspecial" => AlphaNumericSpecial
+                case "alpha"               => Alpha
+                case _                     => AlphaNumeric
+              },
+              Capitalize(capitalize)
+            )
+            val generatePassword: Future[Command] =
+              passgen.ask(
+                Generate(auth, "password", genParameters, _)
               )
-              val generatePassword: Future[Command] =
-                passgen.ask(
-                  Generate(email, "password", genParameters, _)
-                )
-              onSuccess(generatePassword) {
-                case PasswordGeneratedOK(password) =>
-                  complete(StatusCodes.OK -> password)
-                case AuthUserFailure(ex) =>
-                  complete(StatusCodes.Unauthorized -> ex)
-              }
-            }
-          }
-        },
-        path("passphrase") {
-          parameters(
-            "email",
-            "length".as[Int] ? 4
-          ) { (email, length) =>
-            {
-              val genParameters: Seq[GeneratorParameters] = Seq(
-                Length(length)
-              )
-              val generatePassphrase: Future[Command] =
-                passgen.ask(
-                  Generate(email, "passphrase", genParameters, _)
-                )
-              onSuccess(generatePassphrase) {
-                case PasswordGeneratedOK(password) =>
-                  complete(StatusCodes.OK -> password)
-                case AuthUserFailure(ex) =>
-                  complete(StatusCodes.Unauthorized -> ex)
-                case DatabaseFailure(ex) =>
-                  complete(StatusCodes.InternalServerError -> ex)
-              }
+            onSuccess(generatePassword) {
+              case PasswordGeneratedOK(password) =>
+                complete(StatusCodes.OK -> password)
+              case AuthUserFailure(ex) =>
+                complete(StatusCodes.Unauthorized -> ex + "sdfasdf")
             }
           }
         }
-      )
-    }
+      },
+      path("passphrase") {
+        parameters(
+          "auth",
+          "length".as[Int] ? 4
+        ) { (auth, length) =>
+          {
+            val genParameters: Seq[GeneratorParameters] = Seq(
+              Length(length)
+            )
+            val generatePassphrase: Future[Command] =
+              passgen.ask(
+                Generate(auth, "passphrase", genParameters, _)
+              )
+            onSuccess(generatePassphrase) {
+              case PasswordGeneratedOK(password) =>
+                complete(StatusCodes.OK -> password)
+              case AuthUserFailure(ex) =>
+                complete(StatusCodes.Unauthorized -> ex)
+              case DatabaseFailure(ex) =>
+                complete(StatusCodes.InternalServerError -> ex)
+            }
+          }
+        }
+      }
+    )
+
 }

@@ -70,7 +70,7 @@ object PasswordGen {
             email,
             genCommand,
             genParameters,
-            context.self
+            replyTo
           )
           Behaviors.same
         case AuthSuccess(email, genCommand, genParameters, replyTo) =>
@@ -96,6 +96,7 @@ object PasswordGen {
           context.self ! GetPasswordResponse(pass.generatePassword(), replyTo)
           Behaviors.same
         case GetPasswordResponse(maybePassword, replyTo) =>
+          context.log.warn(maybePassword)
           replyTo ! PasswordGeneratedOK(maybePassword)
           Behaviors.same
         case GetPassphrase(length, replyTo) =>

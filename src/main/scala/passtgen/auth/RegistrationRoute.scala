@@ -25,7 +25,7 @@ class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
 
   implicit val timeout: Timeout = 3.seconds
 
-  lazy val theJobRoutes: Route =
+  lazy val registrationRoute: Route =
     pathPrefix("register") {
       concat(
         pathEnd {
