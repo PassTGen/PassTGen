@@ -1,8 +1,5 @@
 package passtgen.auth.user
 
-import reactivemongo.api.bson.BSONValue
-import com.typesafe.config.ConfigException
-
 object User {
   final case class User(val email: String)
   def apply(email: String): User = {

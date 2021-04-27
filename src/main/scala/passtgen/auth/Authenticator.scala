@@ -14,6 +14,7 @@ import scala.util.Success
 import passtgen.passgen.PasswordGen
 import passtgen.passgen.GeneratorParameters
 import org.xbill.DNS.utils.base64
+import akka.actor.Actor
 
 object Authenticator {
 
@@ -25,7 +26,8 @@ object Authenticator {
       email: String,
       genCommand: String,
       genParameters: Seq[GeneratorParameters],
-      replyTo: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PasswordGen.Command],
+      context: ActorRef[PasswordGen.Command]
   ) extends Command
 
   sealed trait Response extends Command
@@ -33,45 +35,66 @@ object Authenticator {
       maybeUser: Option[User],
       genCommand: String,
       genParameters: Seq[GeneratorParameters],
-      replyTo: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PasswordGen.Command],
+      context: ActorRef[PasswordGen.Command]
   ) extends Response
   case class UserDatabaseFailure(
       exception: String,
-      replyTo: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PasswordGen.Command],
+      context: ActorRef[PasswordGen.Command]
   ) extends Response
 
   def AuthenticationProcesses(): Behavior[Command] =
     Behaviors.receive { (context, message) =>
       implicit val exCtx = context.executionContext
       message match {
-        case AuthUser(email, genCommand, genParameters, replyTo) =>
+        case AuthUser(
+              email,
+              genCommand,
+              genParameters,
+              replyTo,
+              actorContext
+            ) =>
           val dbUser: UserDB = UserDB(exCtx)
           val decryptEmail =
             new String(java.util.Base64.getDecoder.decode(email))
           context.pipeToSelf(dbUser.getUser(decryptEmail)) {
-            case Failure(ex) => UserDatabaseFailure(ex.getMessage(), replyTo)
+            case Failure(ex) =>
+              UserDatabaseFailure(ex.getMessage(), replyTo, actorContext)
             case Success(user) =>
-              AuthUserResponse(user, genCommand, genParameters, replyTo)
+              AuthUserResponse(
+                user,
+                genCommand,
+                genParameters,
+                replyTo,
+                actorContext
+              )
           }
           Behaviors.same
-        case AuthUserResponse(maybeUser, genCommand, genParameters, replyTo) =>
+        case AuthUserResponse(
+              maybeUser,
+              genCommand,
+              genParameters,
+              replyTo,
+              actorContext
+            ) =>
           maybeUser match {
             case None =>
-              replyTo ! PasswordGen.AuthFailure(
+              actorContext ! PasswordGen.AuthFailure(
                 "Not Found",
                 replyTo
               )
             case Some(user) =>
-              replyTo ! PasswordGen.AuthSuccess(
+              actorContext ! PasswordGen.AuthSuccess(
                 user.email,
                 genCommand,
                 genParameters,
                 replyTo
               )
           }
-          Behaviors.stopped
-        case UserDatabaseFailure(ex, replyTo) =>
-          replyTo ! PasswordGen.AuthFailure(ex, replyTo)
+          Behaviors.same
+        case UserDatabaseFailure(ex, replyTo, actorContext) =>
+          actorContext ! PasswordGen.AuthFailure(ex, replyTo)
           Behaviors.same
       }
 

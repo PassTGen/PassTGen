@@ -65,17 +65,25 @@ object PasswordGen {
     Behaviors.receive[Command] { (context, message) =>
       message match {
         case Generate(email, genCommand, genParameters, replyTo) =>
-          val authenticator = context.spawn(Authenticator(), s"auth-$email")
+          val authenticator = context.child(s"auth-$email") match {
+            case None => context.spawn(Authenticator(), s"auth-$email")
+            case Some(value) =>
+              value.asInstanceOf[ActorRef[Authenticator.Command]]
+          }
           authenticator ! Authenticator.AuthUser(
             email,
             genCommand,
             genParameters,
-            replyTo
+            replyTo,
+            context.self
           )
           Behaviors.same
         case AuthSuccess(email, genCommand, genParameters, replyTo) =>
-          val generator =
-            context.spawn(generatorBeheavior(), s"gen-$email")
+          val generator = context.child(s"gen-$email") match {
+            case None => context.spawn(generatorBeheavior(), s"gen-$email")
+            case Some(value) =>
+              value.asInstanceOf[ActorRef[PasswordGen.Command]]
+          }
           generator ! (genCommand match {
             case "password" => GetPassword(replyTo, genParameters)
             case "passphrase" =>
