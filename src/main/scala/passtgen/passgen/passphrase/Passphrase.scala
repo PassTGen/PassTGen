@@ -3,10 +3,12 @@ package passtgen.passgen.passphrase
 import scala.concurrent.ExecutionContext
 import passtgen.passgen.Length
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.Random
 import passtgen.passgen.passphrase.word._
 import scala.util.Failure
 import scala.util.Success
+import scala.concurrent.Await
 
 // https://www.eff.org/dice
 // https://www.eff.org/files/2016/09/08/eff_short_wordlist_2_0.txt
@@ -27,17 +29,12 @@ object Passphrase {
 }
 class Passphrase(val length: Length) {
   import Passphrase._
-  def generatePassphrase(implicit ctx: ExecutionContext): Future[String] =
-    Future {
-      val db = WordDB(ctx)
-      Range(0, length.n)
-        .map(_ =>
-          db.getWord(generateRandomIndex)
-            .map({
-              case None        => throw new Exception("Didn't Connect to DB")
-              case Some(value) => value
-            })
-        )
-        .mkString(generateRandomSeparator)
-    }
+  def generatePassphrase(implicit
+      ctx: ExecutionContext
+  ): Future[String] = Future {
+    val db = WordDB(ctx)
+    Range(0, length.n)
+      .map(_ => Await.result(db.getWord(generateRandomIndex), 1.second))
+      .mkString(generateRandomSeparator)
+  }
 }

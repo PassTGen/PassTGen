@@ -15,6 +15,7 @@ import scala.util.Success
 import passtgen.auth.Authenticator
 import passtgen.passgen.passphrase.word.WordDB
 import passtgen.passgen.passphrase.Passphrase
+import scala.concurrent.Future
 
 object PasswordGen {
   def apply(): Behavior[Command] =
