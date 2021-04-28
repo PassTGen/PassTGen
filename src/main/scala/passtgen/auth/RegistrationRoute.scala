@@ -23,7 +23,7 @@ class RegistrationRoute(authenticator: ActorRef[Registration.Command])(implicit
   import akka.actor.typed.scaladsl.AskPattern.Askable
   import Registration._
 
-  implicit val timeout: Timeout = 3.seconds
+  implicit val timeout: Timeout = 120.seconds
 
   lazy val registrationRoute: Route =
     pathPrefix("register") {

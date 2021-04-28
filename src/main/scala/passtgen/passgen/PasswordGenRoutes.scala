@@ -22,7 +22,7 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
   import akka.actor.typed.scaladsl.AskPattern.Askable
   import PasswordGen._
 
-  implicit val timeout: Timeout = 5.seconds
+  implicit val timeout: Timeout = 120.seconds
 
   lazy val passgenRoutes: Route =
     concat(
