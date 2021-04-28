@@ -11,13 +11,13 @@ import User._
 
 object UserDB {
   def apply(implicit ctx: ExecutionContext): UserDB =
-    new UserDB(CommonDb(ctx), ctx)
+    new UserDB()
 
 }
-class UserDB(val commondb: CommonDb, implicit val ctx: ExecutionContext) {
+class UserDB(implicit val ctx: ExecutionContext) {
   import UserCodec._
   val userCollection: Future[BSONCollection] =
-    commondb.passtgendb.map(_.collection("users"))
+    CommonDb(ctx).map(_.collection("users"))
 
   def createUser(email: String): Future[User] =
     User(email) match {

@@ -8,19 +8,31 @@ import reactivemongo.api.bson.{
 }
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.concurrent.duration._
+import reactivemongo.api.MongoConnectionOptions
+import com.typesafe.config.ConfigFactory
 object CommonDb {
-
   implicit val driver = AsyncDriver()
-  def apply(implicit ctx: ExecutionContext) = new CommonDb
-}
-
-class CommonDb(
-    implicit val ctx: ExecutionContext,
-    implicit val driver: AsyncDriver
-) {
-  val mongoUri = ""
-  val parsedUri = MongoConnection.fromString(mongoUri)
-  val futureConnection = parsedUri.flatMap(driver.connect(_))
-  def passtgendb: Future[DB] =
-    futureConnection.flatMap(_.database("passtgendb"))
+  val config = ConfigFactory.load()
+  val host = config.getString("mongo.host")
+  val port = config.getInt("mongo.port")
+  val dbName = config.getString("mongo.dbName")
+  val userName = config.getString("mongo.user")
+  val password = config.getString("mongo.password")
+  val connectionOptions =
+    MongoConnectionOptions(
+      authenticationDatabase = Some(dbName),
+      credentials = Map(
+        dbName -> MongoConnectionOptions.Credential(userName, Some(password))
+      )
+    )
+  val connection: Future[MongoConnection] =
+    driver.connect(
+      List(s"$host:$port/$dbName"),
+      connectionOptions
+    )
+  def apply(implicit ctx: ExecutionContext) = {
+    connection
+      .flatMap(_.database(dbName))
+  }
 }

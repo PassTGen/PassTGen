@@ -16,7 +16,7 @@ object WordDB {
 class WordDB(implicit val ctx: ExecutionContext) {
   import WordCodec._
   val wordList: Future[BSONCollection] =
-    CommonDb(ctx).passtgendb.map(_.collection("wordlist"))
+    CommonDb(ctx).map(_.collection("wordlist"))
   def getWord(id: Int) = {
     wordList
       .flatMap(
@@ -26,8 +26,12 @@ class WordDB(implicit val ctx: ExecutionContext) {
       .transform(
         (s: Option[Word]) => {
           s match {
-            case None        => throw new Exception("No se ha encontrado")
-            case Some(value) => value.word
+            case None => {
+              throw new Exception("No se ha encontrado")
+            }
+            case Some(value) => {
+              value.word
+            }
           }
         },
         (f: Throwable) => {

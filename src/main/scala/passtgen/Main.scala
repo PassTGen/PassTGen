@@ -13,6 +13,7 @@ import passtgen.auth.RegistrationRoute
 import passtgen.passgen.PasswordGenRoutes
 import scala.concurrent.Future
 import akka.actor.typed.PostStop
+import com.typesafe.config._
 
 object Server {
 
@@ -20,8 +21,8 @@ object Server {
   private final case class StartFailed(cause: Throwable) extends Message
   private final case class Started(binding: ServerBinding) extends Message
   case object Stop extends Message
-  def apply(host: String, port: Int): Behavior[Message] = Behaviors.setup {
-    ctx =>
+  def apply(host: String, port: Int): Behavior[Message] =
+    Behaviors.setup { ctx =>
       implicit val system = ctx.system
 
       val buildRegistration = ctx.spawn(Registration(), "Registration")
@@ -70,19 +71,20 @@ object Server {
             if (wasStopped) ctx.self ! Stop
             running(binding)
           case Stop =>
-            // we got a stop message but haven't completed starting yet,
-            // we cannot stop until starting has completed
             starting(wasStopped = true)
         }
 
       starting(wasStopped = false)
-  }
+    }
 }
 
 object Main {
 // https://doc.akka.io/docs/akka-http/current/routing-dsl/index.html#interaction-with-actors
   def main(args: Array[String]): Unit = {
+    val config = ConfigFactory.load()
+    val host = config.getString("server.host")
+    val port = config.getInt("server.port")
     val system: ActorSystem[Server.Message] =
-      ActorSystem(Server("localhost", 5002), "server")
+      ActorSystem(Server(host, port), "server")
   }
 }
