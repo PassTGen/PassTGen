@@ -6,8 +6,7 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.AbstractBehavior
 import akka.actor.typed.scaladsl.ActorContext
 import akka.actor.typed.scaladsl.Behaviors
-import passtgen.auth.user.UserDB
-import passtgen.auth.user.User._
+import passtgen.auth.user._
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
@@ -32,7 +31,7 @@ object Authenticator {
 
   sealed trait Response extends Command
   case class AuthUserResponse(
-      maybeUser: Option[User],
+      maybeUser: Option[user.User],
       genCommand: String,
       genParameters: Seq[GeneratorParameters],
       replyTo: ActorRef[PasswordGen.Command],
@@ -94,7 +93,7 @@ object Authenticator {
           }
           Behaviors.same
         case UserDatabaseFailure(ex, replyTo, actorContext) =>
-          actorContext ! PasswordGen.AuthFailure(ex, replyTo)
+          actorContext ! PasswordGen.AuthFailure("Database Failure", replyTo)
           Behaviors.same
       }
 

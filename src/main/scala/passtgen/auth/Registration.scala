@@ -12,6 +12,7 @@ import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
 import passtgen.passgen.PasswordGen
+import passtgen.auth.user.User
 
 object Registration {
   def apply(): Behavior[Command] =
@@ -47,7 +48,7 @@ object Registration {
             replyTo ! OK(maybeUser)
             Behaviors.same
           case UserDatabaseFailure(ex, replyTo) =>
-            replyTo ! DatabaseFailure(ex.getMessage())
+            replyTo ! DatabaseFailure(s"Database Failure: ${ex.getLocalizedMessage()}")
             Behaviors.same
         }
       }

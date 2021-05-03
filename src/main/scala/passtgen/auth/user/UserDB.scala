@@ -7,7 +7,7 @@ import scala.util.Success
 import passtgen.CommonDb
 import reactivemongo.api.bson._
 import reactivemongo.api.bson.collection.BSONCollection
-import User._
+import passtgen.auth.user.User
 
 object UserDB {
   def apply(implicit ctx: ExecutionContext): UserDB =
@@ -21,9 +21,9 @@ class UserDB(implicit val ctx: ExecutionContext) {
 
   def createUser(email: String): Future[User] =
     User(email) match {
+      case null => Future.failed[User](new Exception("IncorrectEmailFormat"))
       case user: User =>
         userCollection.flatMap(_.insert.one(user).map(_ => user))
-      case _ => Future.failed[User](new Exception("IncorrectEmailFormat"))
     }
 
   def getUser(email: String): Future[Option[User]] = {

@@ -27,7 +27,7 @@ class WordDB(implicit val ctx: ExecutionContext) {
         (s: Option[Word]) => {
           s match {
             case None => {
-              throw new Exception("No se ha encontrado")
+              throw new Exception("Not Found")
             }
             case Some(value) => {
               value.word
