@@ -79,7 +79,6 @@ object Server {
 }
 
 object Main {
-// https://doc.akka.io/docs/akka-http/current/routing-dsl/index.html#interaction-with-actors
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.load()
     val host = config.getString("server.host")

@@ -51,7 +51,7 @@ class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
               case PasswordGeneratedOK(password) =>
                 complete(StatusCodes.OK -> password)
               case AuthUserFailure(ex) =>
-                complete(StatusCodes.Unauthorized -> ex + "sdfasdf")
+                complete(StatusCodes.Unauthorized -> ex)
             }
           }
         }
