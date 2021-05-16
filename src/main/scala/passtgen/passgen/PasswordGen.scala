@@ -59,6 +59,7 @@ object PasswordGen {
       extends Command
 
   final case class PasswordGeneratedOK(password: String) extends Command
+  final case class PassphraseGeneratedOK(passphrase: String) extends Command
   final case class DatabaseFailure(reason: String) extends Command
   final case class AuthUserFailure(reason: String) extends Command
 
@@ -118,7 +119,7 @@ object PasswordGen {
           }
           Behaviors.same
         case GetPassphraseResponse(maybePassphrase, replyTo) =>
-          replyTo ! PasswordGeneratedOK(maybePassphrase)
+          replyTo ! PassphraseGeneratedOK(maybePassphrase)
           Behaviors.same
         case PassphraseDatabaseFailure(ex, replyTo) =>
           replyTo ! DatabaseFailure(ex)
