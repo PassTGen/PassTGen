@@ -80,7 +80,7 @@ object Authenticator {
           maybeUser match {
             case None =>
               actorContext ! PasswordGen.AuthFailure(
-                "Not Found",
+                "User not found",
                 replyTo
               )
             case Some(user) =>
