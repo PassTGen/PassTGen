@@ -11,7 +11,7 @@ import passtgen.auth.user.User._
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
-import passtgen.passgen.PasswordGen
+import passtgen.passgen.PassGen
 import passtgen.auth.user.User
 
 object Registration {

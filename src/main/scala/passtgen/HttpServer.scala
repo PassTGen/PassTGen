@@ -10,7 +10,7 @@ import akka.http.scaladsl.server.Route
 import com.typesafe.config._
 import passtgen.auth.Registration
 import passtgen.auth.RegistrationRoute
-import passtgen.passgen.PasswordGen
+import passtgen.passgen.PassGen
 import passtgen.passgen.PasswordGenRoutes
 
 import scala.concurrent.Future
@@ -29,7 +29,7 @@ object HttpServer {
 
       val buildRegistration = ctx.spawn(Registration(), "Registration")
       val registrationRoute = new RegistrationRoute(buildRegistration)
-      val buildPassGenerator = ctx.spawn(PasswordGen(), "PassGen")
+      val buildPassGenerator = ctx.spawn(PassGen(), "PassGen")
       val passwordRoutes = new PasswordGenRoutes(buildPassGenerator)
 
       lazy val topLevel: Route =

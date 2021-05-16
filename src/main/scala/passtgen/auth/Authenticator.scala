@@ -10,7 +10,7 @@ import passtgen.auth.user._
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
-import passtgen.passgen.PasswordGen
+import passtgen.passgen.PassGen
 import passtgen.passgen.GeneratorParameters
 import org.xbill.DNS.utils.base64
 import akka.actor.Actor
@@ -25,8 +25,8 @@ object Authenticator {
       email: String,
       genCommand: String,
       genParameters: Seq[GeneratorParameters],
-      replyTo: ActorRef[PasswordGen.Command],
-      context: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PassGen.Command],
+      context: ActorRef[PassGen.Command]
   ) extends Command
 
   sealed trait Response extends Command
@@ -34,13 +34,13 @@ object Authenticator {
       maybeUser: Option[user.User],
       genCommand: String,
       genParameters: Seq[GeneratorParameters],
-      replyTo: ActorRef[PasswordGen.Command],
-      context: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PassGen.Command],
+      context: ActorRef[PassGen.Command]
   ) extends Response
   case class UserDatabaseFailure(
       exception: String,
-      replyTo: ActorRef[PasswordGen.Command],
-      context: ActorRef[PasswordGen.Command]
+      replyTo: ActorRef[PassGen.Command],
+      context: ActorRef[PassGen.Command]
   ) extends Response
 
   def AuthenticationProcesses(): Behavior[Command] =
@@ -79,12 +79,12 @@ object Authenticator {
             ) =>
           maybeUser match {
             case None =>
-              actorContext ! PasswordGen.AuthFailure(
+              actorContext ! PassGen.AuthFailure(
                 "User not found",
                 replyTo
               )
             case Some(user) =>
-              actorContext ! PasswordGen.AuthSuccess(
+              actorContext ! PassGen.AuthSuccess(
                 user.email,
                 genCommand,
                 genParameters,
@@ -93,7 +93,7 @@ object Authenticator {
           }
           Behaviors.same
         case UserDatabaseFailure(ex, replyTo, actorContext) =>
-          actorContext ! PasswordGen.AuthFailure("Database Failure", replyTo)
+          actorContext ! PassGen.AuthFailure("Database Failure", replyTo)
           Behaviors.same
       }
 

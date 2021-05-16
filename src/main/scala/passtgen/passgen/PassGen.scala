@@ -17,7 +17,7 @@ import passtgen.passgen.passphrase.word.WordDB
 import passtgen.passgen.passphrase.Passphrase
 import scala.concurrent.Future
 
-object PasswordGen {
+object PassGen {
   def apply(): Behavior[Command] =
     authenticator()
 
@@ -84,7 +84,7 @@ object PasswordGen {
           val generator = context.child(s"gen-$email") match {
             case None => context.spawn(generatorBeheavior(), s"gen-$email")
             case Some(value) =>
-              value.asInstanceOf[ActorRef[PasswordGen.Command]]
+              value.asInstanceOf[ActorRef[PassGen.Command]]
           }
           generator ! (genCommand match {
             case "password" => GetPassword(replyTo, genParameters)

@@ -14,13 +14,13 @@ import scala.concurrent.Future
 import akka.actor.typed.ActorRef
 import passtgen.JsonSupport
 
-class PasswordGenRoutes(passgen: ActorRef[PasswordGen.Command])(implicit
+class PasswordGenRoutes(passgen: ActorRef[PassGen.Command])(implicit
     system: ActorSystem[_]
 ) extends JsonSupport {
 
   import akka.actor.typed.scaladsl.AskPattern.schedulerFromActorSystem
   import akka.actor.typed.scaladsl.AskPattern.Askable
-  import PasswordGen._
+  import PassGen._
 
   implicit val timeout: Timeout = 120.seconds
 
